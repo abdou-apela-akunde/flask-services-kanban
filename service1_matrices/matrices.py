@@ -28,3 +28,9 @@ def multiply(A, B):
 
 def transpose(A):
     return A.T.tolist()
+
+
+def determinant(A):
+    if A.shape[0] != A.shape[1]:
+        raise ValueError("La matrice doit etre carree")
+    return round(float(np.linalg.det(A)), 6)
