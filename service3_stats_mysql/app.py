@@ -1,8 +1,19 @@
 from flask import Flask, request, jsonify
 import numpy as np
+from scipy import stats
 from db import fetch_series
 
 app = Flask(__name__)
+
+@app.route("/")
+def accueil():
+    return jsonify({
+        "message": "Service 3 Stats MySQL fonctionne",
+        "routes": [
+            "/db/stats/describe?serie=serie_A",
+            "/db/stats/correlation?serie_x=serie_A&serie_y=serie_B"
+        ]
+    })
 
 @app.route("/db/stats/describe", methods=["GET"])
 def db_describe():
@@ -27,6 +38,50 @@ def db_describe():
         return jsonify({
             "source": "mysql",
             "resultat": result
+        })
+
+    except ValueError as e:
+        return jsonify({"erreur": str(e)}), 404
+
+    except Exception as e:
+        return jsonify({
+            "erreur": "Erreur base de données",
+            "detail": str(e)
+        }), 500
+
+@app.route("/db/stats/correlation", methods=["GET"])
+def db_correlation():
+
+    serie_x = request.args.get("serie_x")
+    serie_y = request.args.get("serie_y")
+
+    if not serie_x or not serie_y:
+        return jsonify({
+            "erreur": "Paramètres serie_x et serie_y requis"
+        }), 400
+
+    try:
+        x = np.array(fetch_series(serie_x))
+        y = np.array(fetch_series(serie_y))
+
+        n = min(len(x), len(y))
+        x = x[:n]
+        y = y[:n]
+
+        r, p_value = stats.pearsonr(x, y)
+
+        return jsonify({
+            "source": "mysql",
+            "series": {
+                "x": serie_x,
+                "y": serie_y,
+                "n_points": n
+            },
+            "resultat": {
+                "r": round(float(r), 4),
+                "p_value": round(float(p_value), 6),
+                "significatif": bool(p_value < 0.05)
+            }
         })
 
     except ValueError as e:
