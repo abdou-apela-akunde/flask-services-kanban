@@ -34,3 +34,14 @@ def determinant(A):
     if A.shape[0] != A.shape[1]:
         raise ValueError("La matrice doit etre carree")
     return round(float(np.linalg.det(A)), 6)
+
+
+def inverse(A):
+    if A.shape[0] != A.shape[1]:
+        raise ValueError("La matrice doit etre carree")
+
+    det = np.linalg.det(A)
+    if abs(det) < 1e-10:
+        raise ValueError("Matrice singuliere, non inversible")
+
+    return np.linalg.inv(A).round(6).tolist()
