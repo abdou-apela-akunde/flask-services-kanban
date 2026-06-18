@@ -24,3 +24,7 @@ def multiply(A, B):
     if A.shape[1] != B.shape[0]:
         raise ValueError("Le nombre de colonnes de A doit etre egal au nombre de lignes de B")
     return np.dot(A, B).tolist()
+
+
+def transpose(A):
+    return A.T.tolist()
