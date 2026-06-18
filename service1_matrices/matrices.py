@@ -12,3 +12,9 @@ def parse_matrix(data, key):
         raise ValueError(f"Matrice '{key}' invalide : elle doit etre en 2 dimensions")
 
     return matrix
+
+
+def add(A, B):
+    if A.shape != B.shape:
+        raise ValueError("Dimensions incompatibles")
+    return (A + B).tolist()

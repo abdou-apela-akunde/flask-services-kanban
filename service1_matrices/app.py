@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 
-from matrices import parse_matrix
+from matrices import add, parse_matrix
 
 app = Flask(__name__)
 
@@ -11,6 +11,18 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     return response
+
+
+@app.route('/matrices/add', methods=['POST'])
+def add_matrices():
+    data = request.get_json()
+    try:
+        A = parse_matrix(data, 'A')
+        B = parse_matrix(data, 'B')
+        result = add(A, B)
+        return jsonify({'operation': 'addition', 'resultat': result})
+    except (ValueError, TypeError) as exc:
+        return jsonify({'erreur': str(exc)}), 400
 
 
 @app.route('/matrices/health', methods=['GET'])
