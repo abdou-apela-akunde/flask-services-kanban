@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 import numpy as np
-from scipy import stats  # ajout pour utiliser la corrélation et le test de normalité
+from scipy import stats  #pour utiliser corrélation et le test de normalité
+from flask_cors import CORS  #ajout pour que le client HTML 
 
 app = Flask(__name__)
+CORS(app)  #autoriser requêtes de la page HTML
 
 
 @app.route("/stats/describe", methods=["POST"])
