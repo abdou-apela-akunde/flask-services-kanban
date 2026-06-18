@@ -96,6 +96,12 @@ Tests unitaires Python :
 python -m unittest test_service1.py
 ```
 
+Tests executables directement depuis le code :
+
+```bash
+python run_tests_code.py
+```
+
 Test client HTML/JS :
 
 1. Lancer le service avec `python app.py`.
