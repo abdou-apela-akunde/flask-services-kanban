@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 
-from matrices import add, parse_matrix
+from matrices import add, multiply, parse_matrix
 
 app = Flask(__name__)
 
@@ -21,6 +21,18 @@ def add_matrices():
         B = parse_matrix(data, 'B')
         result = add(A, B)
         return jsonify({'operation': 'addition', 'resultat': result})
+    except (ValueError, TypeError) as exc:
+        return jsonify({'erreur': str(exc)}), 400
+
+
+@app.route('/matrices/multiply', methods=['POST'])
+def multiply_matrices():
+    data = request.get_json()
+    try:
+        A = parse_matrix(data, 'A')
+        B = parse_matrix(data, 'B')
+        result = multiply(A, B)
+        return jsonify({'operation': 'multiplication', 'resultat': result})
     except (ValueError, TypeError) as exc:
         return jsonify({'erreur': str(exc)}), 400
 
