@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Test Service 4 CSV</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 760px; margin: 40px auto; }
+    label, button { display: block; margin-top: 16px; }
+    pre { background: #f4f4f4; padding: 16px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Service 4 - test upload CSV</h1>
+  <label>
+    Fichier CSV
+    <input id="file" type="file" accept=".csv">
+  </label>
+  <button id="upload">Envoyer vers /upload/csv</button>
+  <button id="series">Lister /upload/series</button>
+  <pre id="result">En attente...</pre>
+
+  <script>
+    const baseUrl = "http://localhost:5004";
+    const result = document.querySelector("#result");
+
+    document.querySelector("#upload").addEventListener("click", async () => {
+      const file = document.querySelector("#file").files[0];
+      if (!file) {
+        result.textContent = "Choisis un fichier CSV.";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(`${baseUrl}/upload/csv`, {
+        method: "POST",
+        body: formData
+      });
+      result.textContent = JSON.stringify(await response.json(), null, 2);
+    });
+
+    document.querySelector("#series").addEventListener("click", async () => {
+      const response = await fetch(`${baseUrl}/upload/series`);
+      result.textContent = JSON.stringify(await response.json(), null, 2);
+    });
+  </script>
+</body>
+</html>
