@@ -10,31 +10,24 @@ Le service utilise le port `5001`.
 
 ```text
 service1_matrices/
-├── app.py                 # Application Flask principale
-├── matrices.py            # Fonctions de calcul matriciel
-├── requirements.txt       # Dependances Python
-├── README.md              # Documentation du service
-├── client_test.html       # Client HTML/JSON
-├── client_python_test.py  # Client Python HTTP
-└── test_service1.py       # Tests unitaires Python
+|-- app.py                 # Application Flask principale
+|-- matrices.py            # Fonctions de calcul matriciel
+|-- requirements.txt       # Dependances Python
+|-- README.md              # Documentation du service
+|-- client_test.html       # Client HTML/JSON
+|-- client_python_test.py  # Client Python HTTP
+`-- test_service1.py       # Tests unitaires Python
 ```
 
 ## Installation
 
 Sous Windows PowerShell :
 
-```bash
-cd service1_matrices
+```powershell
+cd "C:\Users\but-info\OneDrive - UPEC\Documents\BUT-1\S2\Ressources\R210 - GPO\tp2\flask-services-kanban\service1_matrices"
 python -m venv venv
 venv\Scripts\python.exe -m pip install -r requirements.txt
 venv\Scripts\python.exe app.py
-```
-
-Si l'activation du venv est autorisee :
-
-```bash
-venv\Scripts\activate
-python app.py
 ```
 
 Sous Linux/Mac :
@@ -49,6 +42,8 @@ python app.py
 
 ## Routes disponibles
 
+Les exemples ci-dessous utilisent `curl.exe --%`, qui fonctionne bien dans PowerShell avec du JSON.
+
 ### POST /matrices/add
 
 Additionne deux matrices de memes dimensions.
@@ -59,12 +54,10 @@ Corps de la requete JSON :
 {"A": [[1,2],[3,4]], "B": [[5,6],[7,8]]}
 ```
 
-Exemple curl :
+Commande curl PowerShell :
 
-```bash
-curl -X POST http://localhost:5001/matrices/add \
-  -H 'Content-Type: application/json' \
-  -d '{"A": [[1,2],[3,4]], "B": [[5,6],[7,8]]}'
+```powershell
+curl.exe --% -X POST http://localhost:5001/matrices/add -H "Content-Type: application/json" -d "{\"A\": [[1,2],[3,4]], \"B\": [[5,6],[7,8]]}"
 ```
 
 Reponse attendue :
@@ -85,12 +78,10 @@ Corps de la requete JSON :
 {"A": [[1,2],[3,4]], "B": [[5,6],[7,8]]}
 ```
 
-Exemple curl :
+Commande curl PowerShell :
 
-```bash
-curl -X POST http://localhost:5001/matrices/multiply \
-  -H 'Content-Type: application/json' \
-  -d '{"A": [[1,2],[3,4]], "B": [[5,6],[7,8]]}'
+```powershell
+curl.exe --% -X POST http://localhost:5001/matrices/multiply -H "Content-Type: application/json" -d "{\"A\": [[1,2],[3,4]], \"B\": [[5,6],[7,8]]}"
 ```
 
 Reponse attendue :
@@ -99,12 +90,10 @@ Reponse attendue :
 {"operation": "multiplication", "resultat": [[19.0, 22.0], [43.0, 50.0]]}
 ```
 
-Exemple curl avec deux matrices 3x3 :
+Exemple curl PowerShell avec deux matrices 3x3 :
 
-```bash
-curl -X POST http://localhost:5001/matrices/multiply \
-  -H 'Content-Type: application/json' \
-  -d '{"A": [[1,2,3],[4,5,6],[7,8,9]], "B": [[9,8,7],[6,5,4],[3,2,1]]}'
+```powershell
+curl.exe --% -X POST http://localhost:5001/matrices/multiply -H "Content-Type: application/json" -d "{\"A\": [[1,2,3],[4,5,6],[7,8,9]], \"B\": [[9,8,7],[6,5,4],[3,2,1]]}"
 ```
 
 Erreurs possibles : `400` si les dimensions sont incompatibles.
@@ -119,12 +108,10 @@ Corps de la requete JSON :
 {"A": [[1,2,3],[4,5,6]]}
 ```
 
-Exemple curl :
+Commande curl PowerShell :
 
-```bash
-curl -X POST http://localhost:5001/matrices/transpose \
-  -H 'Content-Type: application/json' \
-  -d '{"A": [[1,2,3],[4,5,6]]}'
+```powershell
+curl.exe --% -X POST http://localhost:5001/matrices/transpose -H "Content-Type: application/json" -d "{\"A\": [[1,2,3],[4,5,6]]}"
 ```
 
 Reponse attendue :
@@ -143,12 +130,10 @@ Corps de la requete JSON :
 {"A": [[1,2],[3,4]]}
 ```
 
-Exemple curl :
+Commande curl PowerShell :
 
-```bash
-curl -X POST http://localhost:5001/matrices/determinant \
-  -H 'Content-Type: application/json' \
-  -d '{"A": [[1,2],[3,4]]}'
+```powershell
+curl.exe --% -X POST http://localhost:5001/matrices/determinant -H "Content-Type: application/json" -d "{\"A\": [[1,2],[3,4]]}"
 ```
 
 Reponse attendue :
@@ -169,12 +154,10 @@ Corps de la requete JSON :
 {"A": [[1,2],[3,4]]}
 ```
 
-Exemple curl :
+Commande curl PowerShell :
 
-```bash
-curl -X POST http://localhost:5001/matrices/inverse \
-  -H 'Content-Type: application/json' \
-  -d '{"A": [[1,2],[3,4]]}'
+```powershell
+curl.exe --% -X POST http://localhost:5001/matrices/inverse -H "Content-Type: application/json" -d "{\"A\": [[1,2],[3,4]]}"
 ```
 
 Reponse attendue :
@@ -185,10 +168,17 @@ Reponse attendue :
 
 Avec NumPy, certains decimaux peuvent apparaitre sous une forme tres proche, par exemple `-1.9999999999999996` au lieu de `-2.0`.
 
-Erreurs possibles :
+Erreur attendue pour une matrice singuliere :
 
-- `400` si la matrice n'est pas carree.
-- `400` si la matrice est singuliere et donc non inversible.
+```powershell
+curl.exe --% -X POST http://localhost:5001/matrices/inverse -H "Content-Type: application/json" -d "{\"A\": [[1,2],[2,4]]}"
+```
+
+Reponse attendue :
+
+```json
+{"erreur": "Matrice singuliere, non inversible"}
+```
 
 ## Tests demandes dans le sujet
 
@@ -198,19 +188,11 @@ Le sujet demande de tester avec Postman ou curl, puis d'ecrire du code de test e
 
 Demarrer le serveur :
 
-```bash
-python app.py
+```powershell
+venv\Scripts\python.exe app.py
 ```
 
-Puis tester une route avec curl. Exemple :
-
-```bash
-curl -X POST http://localhost:5001/matrices/add \
-  -H 'Content-Type: application/json' \
-  -d '{"A": [[1,2],[3,4]], "B": [[5,6],[7,8]]}'
-```
-
-Dans PowerShell, si les guillemets posent probleme, utiliser :
+Puis tester par exemple l'addition :
 
 ```powershell
 curl.exe --% -X POST http://localhost:5001/matrices/add -H "Content-Type: application/json" -d "{\"A\": [[1,2],[3,4]], \"B\": [[5,6],[7,8]]}"
@@ -220,8 +202,8 @@ curl.exe --% -X POST http://localhost:5001/matrices/add -H "Content-Type: applic
 
 Ces tests utilisent le client de test Flask.
 
-```bash
-python -m unittest test_service1.py
+```powershell
+venv\Scripts\python.exe -m unittest test_service1.py
 ```
 
 Resultat attendu :
@@ -237,14 +219,14 @@ Ce fichier envoie de vraies requetes HTTP JSON vers le serveur Flask.
 
 Terminal 1 :
 
-```bash
-python app.py
+```powershell
+venv\Scripts\python.exe app.py
 ```
 
 Terminal 2 :
 
-```bash
-python client_python_test.py
+```powershell
+venv\Scripts\python.exe client_python_test.py
 ```
 
 Resultat attendu :
@@ -257,8 +239,8 @@ Resultat final client Python : 6/6 tests reussis
 
 Demarrer le serveur :
 
-```bash
-python app.py
+```powershell
+venv\Scripts\python.exe app.py
 ```
 
 Puis ouvrir :
@@ -281,8 +263,6 @@ Q4. Apres les routes 1 et 2, les cartes `#2` et `#3` doivent etre en `Termine`, 
 
 Q5. Exemple de requete curl pour tester la multiplication de deux matrices 3x3 :
 
-```bash
-curl -X POST http://localhost:5001/matrices/multiply \
-  -H 'Content-Type: application/json' \
-  -d '{"A": [[1,2,3],[4,5,6],[7,8,9]], "B": [[9,8,7],[6,5,4],[3,2,1]]}'
+```powershell
+curl.exe --% -X POST http://localhost:5001/matrices/multiply -H "Content-Type: application/json" -d "{\"A\": [[1,2,3],[4,5,6],[7,8,9]], \"B\": [[9,8,7],[6,5,4],[3,2,1]]}"
 ```
