@@ -10,6 +10,13 @@ class Service1MatricesTestCase(unittest.TestCase):
     def post_json(self, route, payload):
         return self.client.post(route, json=payload)
 
+    def assertMatrixAlmostEqual(self, result, expected):
+        self.assertEqual(len(result), len(expected))
+        for result_row, expected_row in zip(result, expected):
+            self.assertEqual(len(result_row), len(expected_row))
+            for result_value, expected_value in zip(result_row, expected_row):
+                self.assertAlmostEqual(result_value, expected_value, places=6)
+
     def test_add(self):
         response = self.post_json(
             '/matrices/add',
@@ -39,7 +46,7 @@ class Service1MatricesTestCase(unittest.TestCase):
     def test_inverse(self):
         response = self.post_json('/matrices/inverse', {'A': [[1, 2], [3, 4]]})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json()['resultat'], [[-2.0, 1.0], [1.5, -0.5]])
+        self.assertMatrixAlmostEqual(response.get_json()['resultat'], [[-2.0, 1.0], [1.5, -0.5]])
 
     def test_inverse_singular_matrix(self):
         response = self.post_json('/matrices/inverse', {'A': [[1, 2], [2, 4]]})

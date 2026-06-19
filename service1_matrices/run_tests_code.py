@@ -9,7 +9,7 @@ def verifier_resultat(nom_test, response, resultat_attendu=None, code_attendu=20
         print(data)
         return False
 
-    if resultat_attendu is not None and data.get('resultat') != resultat_attendu:
+    if resultat_attendu is not None and not resultats_equivalents(data.get('resultat'), resultat_attendu):
         print(f"[ECHEC] {nom_test} : resultat incorrect")
         print("Attendu :", resultat_attendu)
         print("Obtenu  :", data.get('resultat'))
@@ -18,6 +18,18 @@ def verifier_resultat(nom_test, response, resultat_attendu=None, code_attendu=20
     print(f"[OK] {nom_test}")
     print(data)
     return True
+
+
+def resultats_equivalents(obtenu, attendu):
+    if isinstance(attendu, list):
+        if not isinstance(obtenu, list) or len(obtenu) != len(attendu):
+            return False
+        return all(resultats_equivalents(o, a) for o, a in zip(obtenu, attendu))
+
+    if isinstance(attendu, float):
+        return abs(obtenu - attendu) < 0.000001
+
+    return obtenu == attendu
 
 
 def lancer_tests():
