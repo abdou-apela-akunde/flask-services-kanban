@@ -1,89 +1,126 @@
 from flask import Flask, request, jsonify
 import numpy as np
-from scipy import stats  #pour utiliser corrélation et le test de normalité
-from flask_cors import CORS  #ajout pour que le client HTML 
+from scipy import stats
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  #autoriser requêtes de la page HTML
+
+CORS(app) #Pour communiquer entre HTML de Flask
 
 
-@app.route("/stats/describe", methods=["POST"])
+#Vérifie les données envoyées
+
+def validate_data(data, key='data'):
+    if key not in data:
+        raise ValueError(f"Clé '{key}' manquante dans la requête")
+
+    values = data[key]
+
+    if not isinstance(values, list) or len(values) < 2:
+        raise ValueError(f"'{key}' doit être une liste d'au moins 2 valeurs")
+
+    return np.array(values, dtype=float)
+
+
+#Route POST /stats/describe
+
+@app.route('/stats/describe', methods=['POST'])
 def describe():
-    try:
-        data = request.get_json()
-        valeurs = data["data"]
+    data = request.get_json()
 
-        resultat = {
-            "n": len(valeurs),
-            "moyenne": round(float(np.mean(valeurs)), 4),
-            "mediane": round(float(np.median(valeurs)), 4),
-            "ecart_type": round(float(np.std(valeurs, ddof=1)), 4),
-            "variance": round(float(np.var(valeurs, ddof=1)), 4),
-            "minimum": round(float(np.min(valeurs)), 4),
-            "maximum": round(float(np.max(valeurs)), 4)
+    try:
+        values = validate_data(data)
+
+        #Calcul des stats avec NumPy
+        result = {
+            'n': int(len(values)),
+            'moyenne': round(float(np.mean(values)), 4),
+            'mediane': round(float(np.median(values)), 4),
+            'ecart_type': round(float(np.std(values, ddof=1)), 4),
+            'variance': round(float(np.var(values, ddof=1)), 4),
+            'minimum': round(float(np.min(values)), 4),
+            'maximum': round(float(np.max(values)), 4),
+            'q1': round(float(np.percentile(values, 25)), 4),
+            'q3': round(float(np.percentile(values, 75)), 4),
+            'etendue': round(float(np.ptp(values)), 4)
         }
 
-        return jsonify({
-            "operation": "description",
-            "resultat": resultat
-        })
+        return jsonify({'operation': 'description', 'resultat': result})
 
-    except Exception as e:
-        return jsonify({"erreur": str(e)}), 400
+    except (ValueError, TypeError) as e:
+        return jsonify({'erreur': str(e)}), 400
 
 
-#route POST
-@app.route("/stats/correlation", methods=["POST"])
+#Route POST /stats/correlation
+
+@app.route('/stats/correlation', methods=['POST'])
 def correlation():
-    try:
-        data = request.get_json()
+    data = request.get_json()
 
-        x = data["x"]
-        y = data["y"]
+    try:
+        x = validate_data(data, 'x')
+        y = validate_data(data, 'y')
 
         if len(x) != len(y):
-            return jsonify({"erreur": "x et y doivent avoir la même longueur"}), 400
+            return jsonify({'erreur': 'x et y doivent avoir la même longueur'}), 400
+
+        #Calcul la corrélation de Pearson
 
         r, p_value = stats.pearsonr(x, y)
 
-        resultat = {
-            "r": round(float(r), 4),
-            "p_value": round(float(p_value), 6)
-        }
+        interpretation = (
+            'forte' if abs(r) > 0.7
+            else 'modérée' if abs(r) > 0.4
+            else 'faible'
+        )
 
         return jsonify({
-            "operation": "correlation_pearson",
-            "resultat": resultat
+            'operation': 'correlation_pearson',
+            'resultat': {
+                'r': round(r, 4),
+                'p_value': round(p_value, 6),
+                'interpretation': interpretation,
+                'significatif': bool(p_value < 0.05)
+            }
         })
 
-    except Exception as e:
-        return jsonify({"erreur": str(e)}), 400
+    except (ValueError, TypeError) as e:
+        return jsonify({'erreur': str(e)}), 400
 
 
-#route POST
-@app.route("/stats/test_normalite", methods=["POST"])
+#Route POST /stats/test_normalite
+
+@app.route('/stats/test_normalite', methods=['POST'])
 def test_normalite():
+    data = request.get_json()
+
     try:
-        data = request.get_json()
+        values = validate_data(data)
 
-        valeurs = data["data"]
+        if len(values) > 5000:
+            return jsonify({'erreur': 'Shapiro-Wilk limité à 5000 valeurs'}), 400
 
-        statistique, p_value = stats.shapiro(valeurs)
+        #Test normalité
 
-        resultat = {
-            "statistique": round(float(statistique), 6),
-            "p_value": round(float(p_value), 6),
-            "est_normale": bool(p_value > 0.05)
-        }
+        stat, p_value = stats.shapiro(values)
 
         return jsonify({
-            "operation": "test_normalite_shapiro_wilk",
-            "resultat": resultat
+            'operation': 'test_normalite_shapiro_wilk',
+            'resultat': {
+                'statistique': round(float(stat), 6),
+                'p_value': round(float(p_value), 6),
+                'est_normale': bool(p_value > 0.05),
+                'interpretation': (
+                    'Distribution normale (p > 0.05)'
+                    if p_value > 0.05
+                    else 'Distribution non normale (p <= 0.05)'
+                )
+            }
         })
 
-    except Exception as e:
-        return jsonify({"erreur": str(e)}), 400
+    except (ValueError, TypeError) as e:
+        return jsonify({'erreur': str(e)}), 400
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True, port=5002)
