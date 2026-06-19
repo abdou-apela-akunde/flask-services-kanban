@@ -1,52 +1,76 @@
-\#Service 2
+\#Service 2 - Statistiques JSON
 
 
 
-ça permet de faire des calculs statistiques avec des données envoyées en JSON.
+Ce service permet de faire des calculs statistiques avec des données envoyées en JSON.
 
 
 
-\#Routes
+\#POST /stats/describe
 
 
 
-POST /stats/describe
+Cette route calcule :
+
+\- la moyenne
+
+\- la médiane
+
+\- l'écart-type
+
+\- la variance
+
+\- le minimum
+
+\- le maximum
+
+\- q1
+
+\- q3
+
+\- l'étendue
 
 
 
-Cette route calcule tout ce qui est:
-
-moyenne, médiane, écart-type, variance, minimum, maximum
+\#POST /stats/correlation
 
 
 
-Puis POST /stats/correlation
+Cette route calcule la corrélation de Pearson entre deux listes.
 
 
 
-qui calcule la corrélation entre deux listes de nombres.
+Le résultat `r` signifie :
+
+\- `r` proche de 1 : forte corrélation positive
+
+\- `r` proche de -1 : forte corrélation négative
+
+\- `r` proche de 0 : faible corrélation
 
 
 
-POST /stats/test\_normalite
+\#POST /stats/test\_normalite
 
 
 
-Permet de savoir si les données suivent une loi normale.
+Cette route utilise le test de Shapiro-Wilk pour vérifier si les données suivent une loi normale.
 
 
 
-Installation
+Si "p\_value > 0.05", les données sont considérées comme normales.
 
 
 
-Installer les bibliothèques avec pip install -r requirements.txt
+\#Installation
 
 
 
+pip install -r requirements.txt
 
 
-Lancer le programme :
+
+\#Lancement
 
 
 
@@ -54,13 +78,61 @@ python app.py
 
 
 
-Le service fonctionne sur le port 5002.
+Le service tourne sur le port 5002.
 
 
 
-Les Tests ont étaient fait avec Curl.
+\#Tests curl
 
 
 
-Le fichier client\_test.html est utile pour faire des tests des routes avec des boutons. CORS sert à autoriser la page HTML à appeler l'API Flask.
+\#Tester /stats/describe
+
+
+
+curl -X POST http://127.0.0.1:5002/stats/describe \\
+
+\-H "Content-Type: application/json" \\
+
+\-d '{"data":\[12.5,15.3,8.7,21.0,13.2,9.8,17.6,11.4]}'
+
+
+
+\#Tester /stats/correlation
+
+
+
+curl -X POST http://127.0.0.1:5002/stats/correlation \\
+
+\-H "Content-Type: application/json" \\
+
+\-d '{"x":\[1,2,3,4,5],"y":\[2,4,6,8,10]}'
+
+
+
+\#Tester /stats/test\_normalite
+
+
+
+curl -X POST http://127.0.0.1:5002/stats/test\_normalite \\
+
+\-H "Content-Type: application/json" \\
+
+\-d '{"data":\[12,13,14,15,16,14,13,15]}'
+
+
+
+\#Tests client
+
+
+
+Le fichier client\_test.html permet de tester les routes avec des boutons.
+
+
+
+Le fichier tests/test\_service2.py permet de tester les routes avec Python.
+
+
+
+CORS est utilisé pour autoriser la page HTML à appeler l'API Flask.
 
