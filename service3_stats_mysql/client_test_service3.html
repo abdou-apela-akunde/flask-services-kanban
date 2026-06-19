@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Tests Service 3 MySQL</title>
+</head>
+<body>
+
+<h1>Tests Service 3 - MySQL</h1>
+
+<button onclick="testDescribe()">Tester /db/stats/describe</button>
+<button onclick="testCorrelation()">Tester /db/stats/correlation</button>
+
+<pre id="resultat"></pre>
+
+<script>
+async function testDescribe() {
+    const response = await fetch("http://127.0.0.1:5003/db/stats/describe?serie=serie_A");
+    const data = await response.json();
+
+    document.getElementById("resultat").textContent =
+        JSON.stringify(data, null, 2);
+}
+
+async function testCorrelation() {
+    const response = await fetch("http://127.0.0.1:5003/db/stats/correlation?serie_x=serie_A&serie_y=serie_B");
+    const data = await response.json();
+
+    document.getElementById("resultat").textContent =
+        JSON.stringify(data, null, 2);
+}
+</script>
+
+</body>
+</html>
