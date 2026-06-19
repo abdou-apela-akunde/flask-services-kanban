@@ -20,7 +20,7 @@ moyenne, médiane, écart-type, variance, minimum, maximum
 
 
 
-Puis POST /stats/correlation 
+Puis POST /stats/correlation
 
 
 
@@ -62,5 +62,5 @@ Les Tests ont étaient fait avec Curl.
 
 
 
-
+Le fichier client\_test.html est utile pour faire des tests des routes avec des boutons. CORS sert à autoriser la page HTML à appeler l'API Flask.
 
