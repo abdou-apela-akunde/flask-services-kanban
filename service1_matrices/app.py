@@ -3,104 +3,103 @@ import numpy as np
 
 app = Flask(__name__)
 
-
-def parse_matrix(data, key):
-    """Convertit une liste de listes en tableau NumPy."""
-    try:
-        return np.array(data[key], dtype=float)
-    except (KeyError, ValueError, TypeError) as e:
+def parse_matrix(data, key):  # Recupere une matrice dans le JSON
+    """Convertit une liste de listes en tableau NumPy.""" 
+    try:  # Essaie de convertir la matrice
+        return np.array(data[key], dtype=float)  # Transforme la liste en matrice NumPy
+    except (KeyError, ValueError, TypeError) as e:  # Gere les erreurs possibles
         raise ValueError(f"Matrice '{key}' invalide : {e}")
 
 
-@app.after_request
+@app.after_request  
 def add_cors_headers(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type' 
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS' 
     return response
 
 
 @app.route('/', methods=['GET'])
-def home():
-    return send_from_directory('.', 'client_test.html')
+def home():  
+    return send_from_directory('.', 'client_test.html')  
 
 
-@app.route('/matrices/add', methods=['POST'])
-def add_matrices():
-    data = request.get_json()
-    try:
-        A = parse_matrix(data, 'A')
-        B = parse_matrix(data, 'B')
-        if A.shape != B.shape:
+@app.route('/matrices/add', methods=['POST']) 
+def add_matrices():  
+    data = request.get_json(force=True)  # Recupere le JSON envoye
+    try:  # Essaie de traiter la requete
+        A = parse_matrix(data, 'A')  # Recupere la matrice A
+        B = parse_matrix(data, 'B')  # Recupere la matrice B
+        if A.shape != B.shape:  # Verifie que les dimensions sont identiques
             return jsonify({'erreur': 'Dimensions incompatibles'}), 400
-        result = (A + B).tolist()
-        return jsonify({'operation': 'addition', 'resultat': result})
-    except (ValueError, TypeError) as e:
-        return jsonify({'erreur': str(e)}), 400
+        result = (A + B).tolist()  # Additionne les matrices
+        return jsonify({'operation': 'addition', 'resultat': result})  # Renvoie le resultat
+    except (ValueError, TypeError) as e:  # Gere les erreurs de donnees
+        return jsonify({'erreur': str(e)}), 400  
 
 
-@app.route('/matrices/multiply', methods=['POST'])
-def multiply_matrices():
-    data = request.get_json()
-    try:
-        A = parse_matrix(data, 'A')
-        B = parse_matrix(data, 'B')
-        if A.shape[1] != B.shape[0]:
+@app.route('/matrices/multiply', methods=['POST']) 
+def multiply_matrices(): 
+    data = request.get_json(force=True)  # Recupere le JSON envoye
+    try:  # Essaie de traiter la requete
+        A = parse_matrix(data, 'A')  # Recupere la matrice A
+        B = parse_matrix(data, 'B')  # Recupere la matrice B
+        if A.shape[1] != B.shape[0]:  # Verifie colonnes A = lignes B
             return jsonify({'erreur': 'Colonnes(A) doit egalerLignes(B)'}), 400
-        result = np.dot(A, B).tolist()
-        return jsonify({'operation': 'multiplication', 'resultat': result})
-    except (ValueError, TypeError) as e:
+        result = np.dot(A, B).tolist()  # Multiplie les matrices
+        return jsonify({'operation': 'multiplication', 'resultat': result})  # Renvoie le resultat
+    except (ValueError, TypeError) as e:  # Gere les erreurs de donnees
         return jsonify({'erreur': str(e)}), 400
 
 
-@app.route('/matrices/transpose', methods=['POST'])
-def transpose_matrix():
-    data = request.get_json()
-    try:
-        A = parse_matrix(data, 'A')
-        result = A.T.tolist()
-        return jsonify({'operation': 'transposee', 'resultat': result})
-    except (ValueError, TypeError) as e:
-        return jsonify({'erreur': str(e)}), 400
+@app.route('/matrices/transpose', methods=['POST'])  # Route pour transposer une matrice
+def transpose_matrix(): 
+    data = request.get_json(force=True)  # Recupere le JSON envoye
+    try:  # Essaie de traiter la requete
+        A = parse_matrix(data, 'A')  # Recupere la matrice A
+        result = A.T.tolist()  # Calcule la transposee
+        return jsonify({'operation': 'transposee', 'resultat': result})  # Renvoie le resultat
+    except (ValueError, TypeError) as e:  # Gere les erreurs de donnees
+        return jsonify({'erreur': str(e)}), 400  
 
 
-@app.route('/matrices/determinant', methods=['POST'])
-def determinant_matrix():
-    data = request.get_json()
-    try:
-        A = parse_matrix(data, 'A')
-        if A.shape[0] != A.shape[1]:
+@app.route('/matrices/determinant', methods=['POST'])  # Route pour calculer le determinant
+def determinant_matrix():  # Fonction de la route determinant
+    data = request.get_json(force=True)  # Recupere le JSON envoye
+    try:  # Essaie de traiter la requete
+        A = parse_matrix(data, 'A')  # Recupere la matrice A
+        if A.shape[0] != A.shape[1]:  # Verifie que la matrice est carree
             return jsonify({'erreur': 'La matrice doit etre carree'}), 400
-        det = np.linalg.det(A)
-        return jsonify({'operation': 'determinant', 'resultat': round(det, 6)})
-    except (ValueError, TypeError) as e:
-        return jsonify({'erreur': str(e)}), 400
+        det = np.linalg.det(A)  # Calcule le determinant
+        return jsonify({'operation': 'determinant', 'resultat': round(det, 6)})  # Renvoie le resultat
+    except (ValueError, TypeError) as e:  # Gere les erreurs de donnees
+        return jsonify({'erreur': str(e)}), 400  
 
 
-@app.route('/matrices/inverse', methods=['POST'])
-def inverse_matrix():
-    data = request.get_json()
-    try:
-        A = parse_matrix(data, 'A')
-        if A.shape[0] != A.shape[1]:
+@app.route('/matrices/inverse', methods=['POST'])  # Route pour inverser une matrice
+def inverse_matrix():  # Fonction de la route inverse
+    data = request.get_json(force=True)  # Recupere le JSON envoye
+    try:  # Essaie de traiter la requete
+        A = parse_matrix(data, 'A')  # Recupere la matrice A
+        if A.shape[0] != A.shape[1]:  # Verifie que la matrice est carree
             return jsonify({'erreur': 'La matrice doit etre carree'}), 400
-        det = np.linalg.det(A)
-        if abs(det) < 1e-10:
+        det = np.linalg.det(A)  # Calcule le determinant
+        if abs(det) < 1e-10:  # Verifie si la matrice est singuliere
             return jsonify({'erreur': 'Matrice singuliere, non inversible'}), 400
-        result = np.linalg.inv(A).tolist()
-        return jsonify({'operation': 'inverse', 'resultat': result})
-    except (ValueError, TypeError) as e:
+        result = np.linalg.inv(A).tolist()  # Calcule l'inverse
+        return jsonify({'operation': 'inverse', 'resultat': result})  # Renvoie le resultat
+    except (ValueError, TypeError) as e:  # Gere les erreurs de donnees
         return jsonify({'erreur': str(e)}), 400
 
 
-@app.route('/matrices/health', methods=['GET'])
-def health():
-    return jsonify({
-        'statut': 'ok',
-        'service': 'Service 1 - Calculs Matriciels',
-        'port': 5001
+@app.route('/matrices/health', methods=['GET'])  # Route pour verifier le service
+def health():  # Fonction de verification
+    return jsonify({  # Renvoie un JSON simple
+        'statut': 'ok',  # Indique que le service marche
+        'service': 'Service 1 - Calculs Matriciels',  # Nom du service
+        'port': 5001  # Port utilise
     })
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5001) 

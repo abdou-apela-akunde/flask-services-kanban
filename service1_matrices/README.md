@@ -4,22 +4,47 @@
 
 API REST Flask pour effectuer des calculs sur des matrices avec NumPy.
 
-Le service fonctionne sur le port `5001`.
+Le service utilise le port `5001`.
+
+## Structure
+
+```text
+service1_matrices/
+├── app.py                 # Application Flask principale
+├── matrices.py            # Fonctions de calcul matriciel
+├── requirements.txt       # Dependances Python
+├── README.md              # Documentation du service
+├── client_test.html       # Client HTML/JSON
+├── client_python_test.py  # Client Python HTTP
+└── test_service1.py       # Tests unitaires Python
+```
 
 ## Installation
+
+Sous Windows PowerShell :
 
 ```bash
 cd service1_matrices
 python -m venv venv
+venv\Scripts\python.exe -m pip install -r requirements.txt
+venv\Scripts\python.exe app.py
+```
+
+Si l'activation du venv est autorisee :
+
+```bash
 venv\Scripts\activate
-pip install -r requirements.txt
 python app.py
 ```
 
-Sous Linux/Mac, l'activation du venv se fait avec :
+Sous Linux/Mac :
 
 ```bash
+cd service1_matrices
+python -m venv venv
 source venv/bin/activate
+pip install -r requirements.txt
+python app.py
 ```
 
 ## Routes disponibles
@@ -158,7 +183,7 @@ Reponse attendue :
 {"operation": "inverse", "resultat": [[-2.0, 1.0], [1.5, -0.5]]}
 ```
 
-Avec NumPy, les nombres decimaux peuvent parfois apparaitre sous une forme tres proche, par exemple `-1.9999999999999996` au lieu de `-2.0`.
+Avec NumPy, certains decimaux peuvent apparaitre sous une forme tres proche, par exemple `-1.9999999999999996` au lieu de `-2.0`.
 
 Erreurs possibles :
 
@@ -167,9 +192,9 @@ Erreurs possibles :
 
 ## Tests demandes dans le sujet
 
-Le sujet demande de faire des tests avec Postman, puis d'ecrire du code de test unitaire en HTML/JSON et en Python pour la partie client.
+Le sujet demande de tester avec Postman ou curl, puis d'ecrire du code de test en HTML/JSON et en Python.
 
-### 1. Tests avec Postman
+### 1. Tests avec curl ou Postman
 
 Demarrer le serveur :
 
@@ -177,27 +202,23 @@ Demarrer le serveur :
 python app.py
 ```
 
-Dans Postman :
+Puis tester une route avec curl. Exemple :
 
-- methode : `POST`
-- URL : `http://localhost:5001/matrices/add`
-- onglet Body : `raw` puis `JSON`
-- JSON :
-
-```json
-{"A": [[1,2],[3,4]], "B": [[5,6],[7,8]]}
+```bash
+curl -X POST http://localhost:5001/matrices/add \
+  -H 'Content-Type: application/json' \
+  -d '{"A": [[1,2],[3,4]], "B": [[5,6],[7,8]]}'
 ```
 
-Refaire le meme principe pour :
+Dans PowerShell, si les guillemets posent probleme, utiliser :
 
-- `POST /matrices/multiply`
-- `POST /matrices/transpose`
-- `POST /matrices/determinant`
-- `POST /matrices/inverse`
+```powershell
+curl.exe --% -X POST http://localhost:5001/matrices/add -H "Content-Type: application/json" -d "{\"A\": [[1,2],[3,4]], \"B\": [[5,6],[7,8]]}"
+```
 
-### 2. Test unitaire Python du service
+### 2. Tests unitaires Python
 
-Ce test utilise le client de test Flask. Il verifie toutes les routes sans ouvrir le navigateur.
+Ces tests utilisent le client de test Flask.
 
 ```bash
 python -m unittest test_service1.py
@@ -212,15 +233,15 @@ OK
 
 ### 3. Test Python de la partie client
 
-Ce test envoie de vraies requetes HTTP JSON vers le serveur Flask, comme un client externe.
+Ce fichier envoie de vraies requetes HTTP JSON vers le serveur Flask.
 
-Dans un premier terminal :
+Terminal 1 :
 
 ```bash
 python app.py
 ```
 
-Dans un deuxieme terminal ou depuis le bouton Run de l'editeur :
+Terminal 2 :
 
 ```bash
 python client_python_test.py
@@ -240,27 +261,21 @@ Demarrer le serveur :
 python app.py
 ```
 
-Puis ouvrir dans le navigateur :
+Puis ouvrir :
 
 ```text
 http://localhost:5001/
 ```
 
-La page affiche un formulaire JSON et des boutons pour tester :
-
-- addition
-- multiplication
-- transposee
-- determinant
-- inverse
+La page permet de tester les routes avec du JSON depuis le navigateur.
 
 ## Reponses aux questions de verification - Service 1
 
-Q1. La bibliotheque Python utilisee pour les calculs matriciels est NumPy. Installation : `pip install numpy`.
+Q1. La bibliotheque utilisee est NumPy. Installation : `pip install numpy`.
 
 Q2. Si on essaie d'inverser une matrice singuliere, elle n'a pas d'inverse. Le service teste le determinant : si `abs(det) < 1e-10`, il renvoie une erreur HTTP `400`.
 
-Q3. Le developpement se fait sur une branche `feature/s1-...`. Les commits suivent la convention : `feat(s1): ajoute la route addition`.
+Q3. Je developpe sur une branche `feature/s1-...`. Les commits suivent le format : `feat(s1): ajoute la route addition`.
 
 Q4. Apres les routes 1 et 2, les cartes `#2` et `#3` doivent etre en `Termine`, donc 2 cartes terminees.
 
