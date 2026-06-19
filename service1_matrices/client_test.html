@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Client test - Service 1 Matrices</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      max-width: 900px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      font-family: Consolas, monospace;
+    }
+
+    button {
+      margin: 6px 6px 6px 0;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    pre {
+      background: #f3f3f3;
+      padding: 12px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Client test - Service 1</h1>
+
+  <p>Demarrer Flask avec <code>python app.py</code>, puis cliquer sur une operation.</p>
+
+  <label for="payload">JSON envoye :</label>
+  <textarea id="payload">{"A": [[1, 2], [3, 4]], "B": [[5, 6], [7, 8]]}</textarea>
+
+  <div>
+    <button onclick="sendRequest('/matrices/add')">Addition</button>
+    <button onclick="sendRequest('/matrices/multiply')">Multiplication</button>
+    <button onclick="useTransposeExample()">Exemple transposee</button>
+    <button onclick="sendRequest('/matrices/transpose')">Transposee</button>
+    <button onclick="sendRequest('/matrices/determinant')">Determinant</button>
+    <button onclick="sendRequest('/matrices/inverse')">Inverse</button>
+  </div>
+
+  <h2>Reponse</h2>
+  <pre id="result">Aucun test lance.</pre>
+
+  <script>
+    const apiUrl = 'http://localhost:5001';
+
+    function useTransposeExample() {
+      document.getElementById('payload').value = '{"A": [[1, 2, 3], [4, 5, 6]]}';
+    }
+
+    async function sendRequest(route) {
+      const result = document.getElementById('result');
+
+      try {
+        const payload = JSON.parse(document.getElementById('payload').value);
+        const response = await fetch(apiUrl + route, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const json = await response.json();
+        result.textContent = JSON.stringify(json, null, 2);
+      } catch (error) {
+        result.textContent = 'Erreur : ' + error.message;
+      }
+    }
+  </script>
+</body>
+</html>
